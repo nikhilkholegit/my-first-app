@@ -19,8 +19,15 @@ jobs:
 
           # Install Android SDK
           sudo apt install -y unzip
+          
+          # Create directory for Android SDK
+          mkdir -p $HOME/Android/cmdline-tools
+          
+          # Download and extract the SDK command-line tools
           wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip
           unzip commandlinetools-linux-7583922_latest.zip -d $HOME/Android/cmdline-tools
+
+          # Move SDK to the correct location
           mkdir -p $HOME/Android/Sdk
           mv $HOME/Android/cmdline-tools $HOME/Android/Sdk/cmdline-tools
 
@@ -36,7 +43,7 @@ jobs:
           buildozer -v android debug
 
       - name: Upload APK
-        uses: actions/upload-artifact@v4  # ✅ Fixed version
+        uses: actions/upload-artifact@v4  # ✅ Updated to v4
         with:
           name: APK
           path: bin/*.apk
