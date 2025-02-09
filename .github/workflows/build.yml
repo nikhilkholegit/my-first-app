@@ -12,29 +12,24 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y openjdk-11-jdk python3 python3-pip
+          sudo apt install -y openjdk-11-jdk python3 python3-pip unzip
           pip install --upgrade pip
           pip install Cython
           pip install kivy buildozer
 
-          # Install Android SDK
-          sudo apt install -y unzip
-          
-          # Create directory for Android SDK
-          mkdir -p $HOME/Android/cmdline-tools
-          
-          # Download and extract the SDK command-line tools
+          # Install Android SDK command line tools
           wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip
+          mkdir -p $HOME/Android/cmdline-tools
           unzip commandlinetools-linux-7583922_latest.zip -d $HOME/Android/cmdline-tools
 
-          # Move SDK to the correct location
-          mkdir -p $HOME/Android/Sdk
-          mv $HOME/Android/cmdline-tools $HOME/Android/Sdk/cmdline-tools
+          # Create Android SDK directories
+          mkdir -p $HOME/Android/Sdk/cmdline-tools
+          mv $HOME/Android/cmdline-tools/cmdline-tools/* $HOME/Android/Sdk/cmdline-tools/
 
-          # Accept Android SDK licenses
+          # Accept SDK licenses
           yes | $HOME/Android/Sdk/cmdline-tools/bin/sdkmanager --licenses
 
-          # Install build-tools (including AIDL)
+          # Install Android SDK components, including AIDL and build tools
           $HOME/Android/Sdk/cmdline-tools/bin/sdkmanager "build-tools;36.0.0-rc4" "platform-tools" "tools" "platforms;android-30"
 
       - name: Build APK
@@ -43,7 +38,7 @@ jobs:
           buildozer -v android debug
 
       - name: Upload APK
-        uses: actions/upload-artifact@v4  # ✅ Updated to v4
+        uses: actions/upload-artifact@v4
         with:
           name: APK
           path: bin/*.apk
