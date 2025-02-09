@@ -14,8 +14,21 @@ jobs:
           sudo apt update
           sudo apt install -y openjdk-11-jdk python3 python3-pip
           pip install --upgrade pip
-          pip install Cython  # ✅ Fix: Install Cython
+          pip install Cython
           pip install kivy buildozer
+
+          # Install Android SDK
+          sudo apt install -y unzip
+          wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip
+          unzip commandlinetools-linux-7583922_latest.zip -d $HOME/Android/cmdline-tools
+          mkdir -p $HOME/Android/Sdk
+          mv $HOME/Android/cmdline-tools $HOME/Android/Sdk/cmdline-tools
+
+          # Accept Android SDK licenses
+          yes | $HOME/Android/Sdk/cmdline-tools/bin/sdkmanager --licenses
+
+          # Install build-tools (including AIDL)
+          $HOME/Android/Sdk/cmdline-tools/bin/sdkmanager "build-tools;36.0.0-rc4" "platform-tools" "tools" "platforms;android-30"
 
       - name: Build APK
         run: |
@@ -23,7 +36,7 @@ jobs:
           buildozer -v android debug
 
       - name: Upload APK
-        uses: actions/upload-artifact@v4  # ✅ Updated from v2 to v4
+        uses: actions/upload-artifact@v4  # ✅ Fixed version
         with:
           name: APK
           path: bin/*.apk
