@@ -11,14 +11,19 @@ jobs:
 
       - name: Install dependencies and Android SDK
         run: |
-          # Update packages and install required tools
+          # Update packages and install required tools.
           sudo apt update
-          sudo apt install -y openjdk-11-jdk python3 python3-pip unzip
+          # Install OpenJDK 8 (for sdkmanager compatibility), python3, pip, and unzip.
+          sudo apt install -y openjdk-8-jdk python3 python3-pip unzip
           pip install --upgrade pip
           pip install Cython
           pip install kivy buildozer
 
-          # Download and extract Android SDK command line tools
+          # Set JAVA_HOME to use Java 8.
+          export JAVA_HOME=/usr/lib/jvm/temurin-8-jdk-amd64
+          echo "JAVA_HOME is set to: $JAVA_HOME"
+
+          # Download and extract Android SDK command line tools.
           wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip
           mkdir -p $HOME/Android/cmdline-tools
           unzip commandlinetools-linux-7583922_latest.zip -d $HOME/Android/cmdline-tools
@@ -28,20 +33,21 @@ jobs:
           mkdir -p $HOME/Android/Sdk/cmdline-tools/latest
           mv $HOME/Android/cmdline-tools/cmdline-tools/* $HOME/Android/Sdk/cmdline-tools/latest/
 
-          # Set the Android SDK root environment variable
+          # Set the Android SDK root environment variable.
           export ANDROID_SDK_ROOT=$HOME/Android/Sdk
+          echo "ANDROID_SDK_ROOT is set to: $ANDROID_SDK_ROOT"
 
-          # Pre-accept SDK licenses by creating the licenses file
+          # Pre-accept SDK licenses by creating the licenses file.
           mkdir -p $ANDROID_SDK_ROOT/licenses
           echo -e "8933bad161af4178b1185d1a37fbf41ea5269c55\n84831b9409646a918e30573bab4c9c91346d8abd\nd56f5187479451eabf01fb78af6dfcb131a6481e\n24333f8a63b6825ea9c5514f83c2829b004d1fee" > $ANDROID_SDK_ROOT/licenses/android-sdk-license
 
-          # Accept any remaining licenses using sdkmanager
+          # Accept any remaining licenses using sdkmanager.
           yes | $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
 
-          # Install required SDK components (including build-tools)
+          # Install required SDK components (including build-tools, platform-tools, etc.).
           $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT "build-tools;36.0.0-rc4" "platform-tools" "tools" "platforms;android-30"
 
-          # Copy the installed SDK to the location Buildozer expects:
+          # Copy the installed SDK to the location Buildozer expects.
           mkdir -p $HOME/.buildozer/android/platform
           cp -r $HOME/Android/Sdk $HOME/.buildozer/android/platform/android-sdk
 
