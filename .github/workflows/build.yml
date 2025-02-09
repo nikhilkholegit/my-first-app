@@ -13,6 +13,8 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y openjdk-11-jdk python3 python3-pip
+          pip install --upgrade pip
+          pip install Cython  # ✅ Fix: Install Cython
           pip install kivy buildozer
 
       - name: Build APK
@@ -21,7 +23,7 @@ jobs:
           buildozer -v android debug
 
       - name: Upload APK
-        uses: actions/upload-artifact@v4  # ✅ Fixed version
+        uses: actions/upload-artifact@v4  # ✅ Updated from v2 to v4
         with:
           name: APK
           path: bin/*.apk
