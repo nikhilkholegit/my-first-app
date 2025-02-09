@@ -9,28 +9,34 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install dependencies
+      - name: Install dependencies and Android SDK
         run: |
+          # Update and install required packages
           sudo apt update
           sudo apt install -y openjdk-11-jdk python3 python3-pip unzip
           pip install --upgrade pip
           pip install Cython
           pip install kivy buildozer
 
-          # Install Android SDK command line tools
+          # Set up directories for Android SDK
+          mkdir -p $HOME/Android
+          
+          # Download and extract the command line tools
           wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip
           mkdir -p $HOME/Android/cmdline-tools
           unzip commandlinetools-linux-7583922_latest.zip -d $HOME/Android/cmdline-tools
 
-          # Create Android SDK directories
-          mkdir -p $HOME/Android/Sdk/cmdline-tools
-          mv $HOME/Android/cmdline-tools/cmdline-tools/* $HOME/Android/Sdk/cmdline-tools/
+          # Create the proper folder structure for the SDK:
+          # The sdkmanager expects tools under <sdk>/cmdline-tools/latest/
+          mkdir -p $HOME/Android/Sdk/cmdline-tools/latest
+          mv $HOME/Android/cmdline-tools/cmdline-tools/* $HOME/Android/Sdk/cmdline-tools/latest/
 
-          # Accept SDK licenses
-          yes | $HOME/Android/Sdk/cmdline-tools/bin/sdkmanager --licenses
+          # Set the ANDROID_SDK_ROOT environment variable
+          export ANDROID_SDK_ROOT=$HOME/Android/Sdk
 
-          # Install Android SDK components, including AIDL and build tools
-          $HOME/Android/Sdk/cmdline-tools/bin/sdkmanager "build-tools;36.0.0-rc4" "platform-tools" "tools" "platforms;android-30"
+          # Accept licenses and install required SDK components using --sdk_root
+          yes | $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
+          $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT "build-tools;36.0.0-rc4" "platform-tools" "tools" "platforms;android-30"
 
       - name: Build APK
         run: |
